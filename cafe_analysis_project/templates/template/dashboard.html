@@ -1,0 +1,80 @@
+{% extends "layouts/base.html" %}
+
+{% load static %}
+{% load sass_tags %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <h2>Person Data Visualization</h2>
+            
+            <!-- Left Card for Gender Distribution -->
+            <div class="col-md-3"> <!-- Adjust width with col-md-6 to make both charts same width -->
+                <div class="card h-10"> <!-- h-100 ensures both cards are of equal height -->
+                    <div class="card-body">
+                        <h3 class="card-title">Gender Distribution</h3>
+                        <canvas id="genderChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Card for Age Range Distribution -->
+            <div class="col-md-3"> <!-- Same width as the left chart -->
+                <div class="card h-10"> <!-- h-100 ensures both cards are of equal height -->
+                    <div class="card-body">
+                        <h3 class="card-title">Age Range Distribution</h3>
+                        <canvas id="ageRangeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Parse the JSON data passed from the Django context
+    var genderData = JSON.parse('{{ gender_count|safe }}');
+    var ageRangeData = JSON.parse('{{ age_range_count|safe }}');
+
+    // Gender Distribution Pie Chart
+    var genderChartCtx = document.getElementById('genderChart').getContext('2d');
+    var genderChart = new Chart(genderChartCtx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(genderData),  // Gender labels
+            datasets: [{
+                data: Object.values(genderData),  // Gender counts
+                backgroundColor: ['#FF6384', '#36A2EB'],
+            }]
+        },
+        options: {
+            responsive: true,
+        }
+    });
+
+    // Age Range Distribution Bar Chart
+    var ageRangeChartCtx = document.getElementById('ageRangeChart').getContext('2d');
+    var ageRangeChart = new Chart(ageRangeChartCtx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(ageRangeData),  // Age range labels ('0-18', '18-60', '60+')
+            datasets: [{
+                label: 'Number of Persons',
+                data: Object.values(ageRangeData),  // Age range counts
+                backgroundColor: '#FFCE56',
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
