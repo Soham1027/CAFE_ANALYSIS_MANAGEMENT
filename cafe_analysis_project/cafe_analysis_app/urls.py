@@ -1,9 +1,7 @@
-
-
+# urls.py
 from django.urls import path
-from .views import *
+from . import views
 
 urlpatterns = [
-    path('', DashboardView.as_view(),name="dashboard"),
-    
+    path('start-video/', views.start_video_processing, name='start_video'),
 ]

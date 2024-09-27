@@ -1,0 +1,23 @@
+{% extends "layouts/base.html" %}
+
+{% load static %}
+{% load sass_tags %}
+
+{% block content %}
+   <!-- templates/upload_video.html -->
+
+    <h1>Upload a video to process</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="video_file" accept="video/*" required>
+        <button type="submit">Upload Video</button>
+    </form>
+
+
+{% endblock %}
+
+{% block script %}
+
+
+
+{% endblock %}
