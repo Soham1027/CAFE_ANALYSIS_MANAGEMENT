@@ -4,69 +4,69 @@
 {% load sass_tags %}
 
 {% block content %}
-    <div class="container-fluid">
-        <div class="row mb-3 align-items-center">
-            <div class="col-md-3">
-                <select id="filterSelect" onchange="updateFilter()" class="form-select">
-                    <option value="day" {% if filter_option == 'day' %}selected{% endif %}>Last Day</option>
-                    <option value="week" {% if filter_option == 'week' %}selected{% endif %}>Last Week</option>
-                    <option value="month" {% if filter_option == 'month' %}selected{% endif %}>Last Month</option>
-                    <option value="year" {% if filter_option == 'year' %}selected{% endif %}>Last Year</option>
-                </select>
-            </div>
+<div class="container-fluid">
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-3">
+            <select id="filterSelect" onchange="updateFilter()" class="form-select">
+                <option value="day" {% if filter_option == 'day' %}selected{% endif %}>Last Day</option>
+                <option value="week" {% if filter_option == 'week' %}selected{% endif %}>Last Week</option>
+                <option value="month" {% if filter_option == 'month' %}selected{% endif %}>Last Month</option>
+                <option value="year" {% if filter_option == 'year' %}selected{% endif %}>Last Year</option>
+            </select>
         </div>
-        
-        <div class="row justify-content-end">
-            <!-- Data Visualization Charts -->
-            <div class="col-md-9">  <!-- Adjusted width -->
-                <div class="row">
-                    <div class="col-md-5"> <!-- Adjusted width -->
-                        <!-- Age Polar Area Chart -->
-                        <div class="card mb-2">
-                            <div class="card-header">
-                                <h5 class="mb-0">Age Distribution</h5>
-                            </div>
-                            <div class="card-body" style="padding: 1rem;">
-                                <canvas id="ageChart" style="height: 200px;"></canvas>
-                            </div>
+    </div>
+    
+    <div class="row justify-content-end">
+        <!-- Data Visualization Charts -->
+        <div class="col-md-9">  <!-- Adjusted width -->
+            <div class="row">
+                <div class="col-md-5"> <!-- Adjusted width -->
+                    <!-- Age Polar Area Chart -->
+                    <div class="card mb-2">
+                        <div class="card-header">
+                            <h5 class="mb-0">Age Distribution</h5>
                         </div>
-
-                        <!-- Gender Bar Chart -->
-                        <div class="card mb-2">
-                            <div class="card-header">
-                                <h5 class="mb-0">Gender Distribution</h5>
-                            </div>
-                            <div class="card-body" style="padding: 1rem;">
-                                <canvas id="genderChart" style="height: 200px;"></canvas>
-                            </div>
+                        <div class="card-body" style="padding: 1rem;">
+                            <canvas id="ageChart" ></canvas>
                         </div>
                     </div>
 
-                    <div class="col-md-6"> <!-- Adjusted width -->
-                        <!-- Average Time Spent Line Chart -->
-                        <div class="card mb-2">
-                            <div class="card-header">
-                                <h5 class="mb-0">Average Time Spent</h5>
-                            </div>
-                            <div class="card-body" style="padding: 1rem;">
-                                <canvas id="avgTimeSpentChart" style="height: 200px;"></canvas>
-                            </div>
+                    <!-- Gender Bar Chart -->
+                    <div class="card mb-2">
+                        <div class="card-header">
+                            <h5 class="mb-0">Gender Distribution</h5>
                         </div>
+                        <div class="card-body" style="padding: 1rem;">
+                            <canvas id="genderChart" style="height: 200px;"></canvas>
+                        </div>
+                    </div>
+                </div>
 
-                        <!-- Total Persons Detected Chart -->
-                        <div class="card mb-2">
-                            <div class="card-header">
-                                <h5 class="mb-0">Total Persons Detected</h5>
-                            </div>
-                            <div class="card-body" style="padding: 1rem;">
-                                <canvas id="totalPersonsChart" style="height: 200px;"></canvas>
-                            </div>
+                <div class="col-md-6"> <!-- Adjusted width -->
+                    <!-- Average Time Spent Line Chart -->
+                    <div class="card mb-2">
+                        <div class="card-header">
+                            <h5 class="mb-0">Average Time Spent</h5>
+                        </div>
+                        <div class="card-body" style="padding: 1rem;">
+                            <canvas id="avgTimeSpentChart" style="height: 200px;"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Total Persons Detected Chart -->
+                    <div class="card mb-2">
+                        <div class="card-header">
+                            <h5 class="mb-0">Total Persons Detected</h5>
+                        </div>
+                        <div class="card-body" style="padding: 1rem;">
+                            <canvas id="totalPersonsChart" style="height: 200px;"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}
 
 {% block script %}
@@ -87,23 +87,33 @@
                     label: 'Age Distribution',
                     data: [{% for age in age_data %}{{ age.count }},{% endfor %}],
                     backgroundColor: [
-                        'rgba(255, 99, 132,0.5)',
-                        'rgba(54, 162, 235,0.5)',
-                        'rgba(255, 206, 86,0.5)',
-                        'rgba(75, 192, 192,0.5)',
-                        'rgba(153, 102, 255,0.5)',
-                        'rgba(153, 272, 255,0.5)'
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)',
+                        'rgba(153, 272, 255, 0.5)'
                     ],
                     borderColor: [
-                        'rgba(255, 99, 132,1)',
-                        'rgba(54, 162, 235,1)',
-                        'rgba(255, 206, 86,1)',
-                        'rgba(75, 192, 192,1)',
-                        'rgba(153, 102, 255,1)',
-                        'rgba(153, 272, 255,0.5)'
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(153, 272, 255, 1)'
                     ],
                     borderWidth: 1
                 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 1500,
+                    easing: 'easeInOutQuad',
+                    animateScale: true,  // Enables scaling animation
+                    animateRotate: true  // Enables rotation animation
+                }
             }
         });
 
@@ -126,6 +136,12 @@
                     ],
                     borderWidth: 1
                 }]
+            },
+            options: {
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutBounce'
+                }
             }
         });
 
@@ -142,6 +158,12 @@
                     borderWidth: 1,
                     fill: false,
                 }]
+            },
+            options: {
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                }
             }
         });
 
@@ -158,7 +180,14 @@
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1
                 }]
+            },
+            options: {
+                animation: {
+                    duration: 2000,
+                    easing: 'easeInOutCubic'
+                }
             }
         });
     </script>
 {% endblock %}
+

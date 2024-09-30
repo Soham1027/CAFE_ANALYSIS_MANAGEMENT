@@ -8,13 +8,9 @@ class PersonDetectionAdmin(admin.ModelAdmin):
 
 admin.site.register( PersonDetection,PersonDetectionAdmin)
 
-# class PersonDetectionAdmin(admin.ModelAdmin):
-#     list_display = ('person_id','gender','age_range','dwell_time','detected_at')
 
-# admin.site.register(PersonDetection, PersonDetectionAdmin)
+class DetectionSummaryAdmin(admin.ModelAdmin):
+    list_display = ('total_persons','updated_at')
 
-# class DetectionSummaryAdmin(admin.ModelAdmin):
-#     list_display = ('total_persons_detected','video','summary_created_at')
-
-# admin.site.register( DetectionSummaryAdmin)
+admin.site.register(PersonCount,DetectionSummaryAdmin)
 
