@@ -1,4 +1,3 @@
-# detection_utils.py
 import cv2
 import numpy as np
 import time
@@ -77,10 +76,12 @@ def track_dwell_time(centroid, frame, startX, startY, gender, age):
     current_time = time.time()
     person_count_obj, _ = PersonCount.objects.get_or_create(pk=1)  # Single entry for person count
 
+    # Check if person exists in the tracker based on centroid movement
     for person_id, data in person_tracker.items():
         distance_moved = np.linalg.norm(np.array(centroid) - np.array(data['last_position']))
 
         if distance_moved < 100:
+            # Update existing person info
             person_tracker[person_id]['last_position'] = centroid
             dwell_time = current_time - person_tracker[person_id]['initial_time']
             
@@ -88,24 +89,35 @@ def track_dwell_time(centroid, frame, startX, startY, gender, age):
             person.time_spent = dwell_time
             person.last_seen = datetime.datetime.now()
             person.save()
-            
+
+            # Annotate the frame with person data
             cv2.putText(frame, f"Dwell Time: {dwell_time:.1f}s", (startX, startY - 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             cv2.putText(frame, f"Person ID: {person_id}", (startX, startY - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             return
 
-    new_person_id = len(person_tracker)
+    # If it's a new person, generate a new person ID
+    if PersonDetection.objects.exists():
+        last_person = PersonDetection.objects.latest('person_id')
+        new_person_id = last_person.person_id + 1
+    else:
+        new_person_id = 0
+
+    # Track the new person
     person_tracker[new_person_id] = {'initial_time': current_time, 'last_position': centroid}
     
+    # Save the new person in the database
     PersonDetection.objects.create(
         person_id=new_person_id, 
         age=age, 
         gender=gender, 
         time_spent=0
     )
-    
+
+    # Update the person count
     person_count_obj.total_persons += 1
     person_count_obj.save()
 
+    # Annotate the frame with new person data
     cv2.putText(frame, f"Person ID: {new_person_id}", (startX, startY - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
 def process_detections(frame, detections, classes, age_net, gender_net):

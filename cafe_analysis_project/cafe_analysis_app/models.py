@@ -2,7 +2,7 @@
 from django.db import models
 
 class PersonDetection(models.Model):
-    person_id = models.IntegerField()  # Unique ID for each person detected
+    person_id = models.IntegerField(unique=True)  # Unique ID for each person detected
     age = models.CharField(max_length=50)
     gender = models.CharField(max_length=10)
     time_spent = models.FloatField()  # Time spent in seconds

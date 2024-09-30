@@ -3,10 +3,10 @@ from .models import *
 # Register your models here.
 
 
-# class ProcessedVideoAdmin(admin.ModelAdmin):
-#     list_display = ('video_file','processed_at')
+class PersonDetectionAdmin(admin.ModelAdmin):
+    list_display = ('person_id','age','gender','time_spent','detection_time','last_seen')
 
-# admin.site.register( ProcessedVideoAdmin)
+admin.site.register( PersonDetection,PersonDetectionAdmin)
 
 # class PersonDetectionAdmin(admin.ModelAdmin):
 #     list_display = ('person_id','gender','age_range','dwell_time','detected_at')

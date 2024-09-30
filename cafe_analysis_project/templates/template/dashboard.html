@@ -5,25 +5,63 @@
 
 {% block content %}
     <div class="container-fluid">
-        <div class="row">
-            <h2>Person Data Visualization</h2>
-            
-            <!-- Left Card for Gender Distribution -->
-            <div class="col-md-3"> <!-- Adjust width with col-md-6 to make both charts same width -->
-                <div class="card h-10"> <!-- h-100 ensures both cards are of equal height -->
-                    <div class="card-body">
-                        <h3 class="card-title">Gender Distribution</h3>
-                        <canvas id="genderChart"></canvas>
-                    </div>
-                </div>
+        <div class="row mb-3 align-items-center">
+            <div class="col-md-3">
+                <select id="filterSelect" onchange="updateFilter()" class="form-select">
+                    <option value="day" {% if filter_option == 'day' %}selected{% endif %}>Last Day</option>
+                    <option value="week" {% if filter_option == 'week' %}selected{% endif %}>Last Week</option>
+                    <option value="month" {% if filter_option == 'month' %}selected{% endif %}>Last Month</option>
+                    <option value="year" {% if filter_option == 'year' %}selected{% endif %}>Last Year</option>
+                </select>
             </div>
+        </div>
+        
+        <div class="row justify-content-end">
+            <!-- Data Visualization Charts -->
+            <div class="col-md-9">  <!-- Adjusted width -->
+                <div class="row">
+                    <div class="col-md-5"> <!-- Adjusted width -->
+                        <!-- Age Polar Area Chart -->
+                        <div class="card mb-2">
+                            <div class="card-header">
+                                <h5 class="mb-0">Age Distribution</h5>
+                            </div>
+                            <div class="card-body" style="padding: 1rem;">
+                                <canvas id="ageChart" style="height: 200px;"></canvas>
+                            </div>
+                        </div>
 
-            <!-- Right Card for Age Range Distribution -->
-            <div class="col-md-3"> <!-- Same width as the left chart -->
-                <div class="card h-10"> <!-- h-100 ensures both cards are of equal height -->
-                    <div class="card-body">
-                        <h3 class="card-title">Age Range Distribution</h3>
-                        <canvas id="ageRangeChart"></canvas>
+                        <!-- Gender Bar Chart -->
+                        <div class="card mb-2">
+                            <div class="card-header">
+                                <h5 class="mb-0">Gender Distribution</h5>
+                            </div>
+                            <div class="card-body" style="padding: 1rem;">
+                                <canvas id="genderChart" style="height: 200px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6"> <!-- Adjusted width -->
+                        <!-- Average Time Spent Line Chart -->
+                        <div class="card mb-2">
+                            <div class="card-header">
+                                <h5 class="mb-0">Average Time Spent</h5>
+                            </div>
+                            <div class="card-body" style="padding: 1rem;">
+                                <canvas id="avgTimeSpentChart" style="height: 200px;"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Total Persons Detected Chart -->
+                        <div class="card mb-2">
+                            <div class="card-header">
+                                <h5 class="mb-0">Total Persons Detected</h5>
+                            </div>
+                            <div class="card-body" style="padding: 1rem;">
+                                <canvas id="totalPersonsChart" style="height: 200px;"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -32,49 +70,95 @@
 {% endblock %}
 
 {% block script %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    // Parse the JSON data passed from the Django context
-    var genderData = JSON.parse('{{ gender_count|safe }}');
-    var ageRangeData = JSON.parse('{{ age_range_count|safe }}');
-
-    // Gender Distribution Pie Chart
-    var genderChartCtx = document.getElementById('genderChart').getContext('2d');
-    var genderChart = new Chart(genderChartCtx, {
-        type: 'pie',
-        data: {
-            labels: Object.keys(genderData),  // Gender labels
-            datasets: [{
-                data: Object.values(genderData),  // Gender counts
-                backgroundColor: ['#FF6384', '#36A2EB'],
-            }]
-        },
-        options: {
-            responsive: true,
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function updateFilter() {
+            const filter = document.getElementById('filterSelect').value;
+            window.location.href = `?filter=${filter}`;  // Redirect to update the filter
         }
-    });
 
-    // Age Range Distribution Bar Chart
-    var ageRangeChartCtx = document.getElementById('ageRangeChart').getContext('2d');
-    var ageRangeChart = new Chart(ageRangeChartCtx, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(ageRangeData),  // Age range labels ('0-18', '18-60', '60+')
-            datasets: [{
-                label: 'Number of Persons',
-                data: Object.values(ageRangeData),  // Age range counts
-                backgroundColor: '#FFCE56',
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
+        // Age Polar Area Chart
+        var ageCtx = document.getElementById('ageChart').getContext('2d');
+        var ageChart = new Chart(ageCtx, {
+            type: 'polarArea',
+            data: {
+                labels: [{% for age in age_data %}'{{ age.age }}',{% endfor %}],
+                datasets: [{
+                    label: 'Age Distribution',
+                    data: [{% for age in age_data %}{{ age.count }},{% endfor %}],
+                    backgroundColor: [
+                        'rgba(255, 99, 132,0.5)',
+                        'rgba(54, 162, 235,0.5)',
+                        'rgba(255, 206, 86,0.5)',
+                        'rgba(75, 192, 192,0.5)',
+                        'rgba(153, 102, 255,0.5)',
+                        'rgba(153, 272, 255,0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132,1)',
+                        'rgba(54, 162, 235,1)',
+                        'rgba(255, 206, 86,1)',
+                        'rgba(75, 192, 192,1)',
+                        'rgba(153, 102, 255,1)',
+                        'rgba(153, 272, 255,0.5)'
+                    ],
+                    borderWidth: 1
+                }]
             }
-        }
-    });
-</script>
+        });
+
+        // Gender Bar Chart
+        var genderCtx = document.getElementById('genderChart').getContext('2d');
+        var genderChart = new Chart(genderCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for gender in gender_data %}'{{ gender.gender }}',{% endfor %}],
+                datasets: [{
+                    label: 'Gender Distribution',
+                    data: [{% for gender in gender_data %}{{ gender.count }},{% endfor %}],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            }
+        });
+
+        // Average Time Spent Line Chart
+        var avgTimeSpentCtx = document.getElementById('avgTimeSpentChart').getContext('2d');
+        var avgTimeSpentChart = new Chart(avgTimeSpentCtx, {
+            type: 'line',
+            data: {
+                labels: ['Average Time Spent'],
+                datasets: [{
+                    label: 'Average Time (seconds)',
+                    data: [{{ avg_time_spent|default:0 }}],
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 1,
+                    fill: false,
+                }]
+            }
+        });
+
+        // Total Persons Detected Chart
+        var totalPersonsCtx = document.getElementById('totalPersonsChart').getContext('2d');
+        var totalPersonsChart = new Chart(totalPersonsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Total Persons Detected'],
+                datasets: [{
+                    label: 'Total Persons',
+                    data: [{{ total_persons }}],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            }
+        });
+    </script>
 {% endblock %}
