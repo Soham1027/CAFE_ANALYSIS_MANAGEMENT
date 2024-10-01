@@ -16,6 +16,14 @@ def load_models():
 
     return yolo_net, classes, age_net, gender_net
 
+def draw_tracking_lines(frame):
+    for person_id, data in person_tracker.items():
+        # Retrieve the last positions to draw lines
+        positions = data.get('positions', [])
+        if len(positions) > 1:
+            for i in range(len(positions) - 1):
+                cv2.line(frame, positions[i], positions[i + 1], (0, 255, 0), 2)
+
 def yolo_object_detection(frame, net, classes, target_class_ids, conf_threshold=0.25, nms_threshold=0.20):
     height, width = frame.shape[:2]
     blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416), swapRB=True, crop=False)
@@ -83,6 +91,7 @@ def track_dwell_time(centroid, frame, startX, startY, gender, age):
         if distance_moved < 100:
             # Update existing person info
             person_tracker[person_id]['last_position'] = centroid
+            person_tracker[person_id]['positions'].append(centroid)  # Store the position for line drawing
             dwell_time = current_time - person_tracker[person_id]['initial_time']
             
             person = PersonDetection.objects.get(person_id=person_id)
@@ -103,7 +112,11 @@ def track_dwell_time(centroid, frame, startX, startY, gender, age):
         new_person_id = 0
 
     # Track the new person
-    person_tracker[new_person_id] = {'initial_time': current_time, 'last_position': centroid}
+    person_tracker[new_person_id] = {
+        'initial_time': current_time,
+        'last_position': centroid,
+        'positions': [centroid]  # Initialize positions for line drawing
+    }
     
     # Save the new person in the database
     PersonDetection.objects.create(
@@ -132,5 +145,8 @@ def process_detections(frame, detections, classes, age_net, gender_net):
             cv2.putText(frame, f"{gender}, {age}", (startX, startY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
             track_dwell_time(centroid, frame, startX, startY, gender, age)
+
+    # Draw the tracking lines after processing detections
+    draw_tracking_lines(frame)
 
     return frame
