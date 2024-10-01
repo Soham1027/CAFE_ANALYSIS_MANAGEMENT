@@ -10,6 +10,6 @@ urlpatterns = [
     path('stop-video/', stop_video_processing, name='stop_video'),
 
     path('dashboard/',views.dashboard_view, name='dashboard'),
-
+    path('get-dashboard-data/', views.get_dashboard_data, name='get_dashboard_data'),
    
 ]

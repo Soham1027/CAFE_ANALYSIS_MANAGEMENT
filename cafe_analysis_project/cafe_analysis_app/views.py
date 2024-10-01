@@ -5,7 +5,7 @@ import threading
 # from .process_video import process_live_video_with_stop
 from collections import Counter
 from .models import *
-from django.db.models import Count,Avg
+from django.db.models import Count,Avg,Sum
 from django.utils import timezone
 from datetime import timedelta
 
@@ -37,7 +37,7 @@ def dashboard_view(request):
     elif filter_option == 'year':
         start_date = today - timezone.timedelta(days=365)
     else:
-        start_date = today - timezone.timedelta(days=1)  # Default case if filter is unknown
+        start_date = today  # Default case if filter is unknown
 
     # Data for age distribution (polar area chart)
     age_data = PersonDetection.objects.filter(detection_time__date=start_date).values('age').annotate(count=Count('age')).order_by('age')
@@ -49,8 +49,7 @@ def dashboard_view(request):
     avg_time_spent_data = PersonDetection.objects.filter(detection_time__date=start_date).aggregate(avg_time_spent=Avg('time_spent'))
 
     # Data for total persons
-    total_persons = PersonCount.objects.latest('updated_at').total_persons
-
+    total_persons = PersonCount.objects.filter(date=start_date).aggregate(total=Sum('total_persons'))['total'] or 0
     context = {
         'age_data': age_data,
         'gender_data': gender_data,
@@ -63,3 +62,34 @@ def dashboard_view(request):
 
   # Adjust import based on your app structure
 
+def get_dashboard_data(request):
+    filter_option = request.GET.get('filter', 'day')
+    today = timezone.now().date()
+
+    if filter_option == 'current_day':
+        start_date = today
+    elif filter_option == 'yesterday':
+        start_date = today - timezone.timedelta(days=1)
+    elif filter_option == 'week':
+        start_date = today - timezone.timedelta(weeks=1)
+    elif filter_option == 'month':
+        start_date = today - timezone.timedelta(days=30)
+    elif filter_option == 'year':
+        start_date = today - timezone.timedelta(days=365)
+    else:
+        start_date = today
+
+    # Get data
+    age_data = PersonDetection.objects.filter(detection_time__date=start_date).values('age').annotate(count=Count('age')).order_by('age')
+    gender_data = PersonDetection.objects.filter(detection_time__date=start_date).values('gender').annotate(count=Count('gender')).order_by('gender')
+    avg_time_spent = PersonDetection.objects.filter(detection_time__date=start_date).aggregate(avg_time_spent=Avg('time_spent'))['avg_time_spent'] or 0
+    total_persons = PersonCount.objects.filter(date=start_date).aggregate(total=Sum('total_persons'))['total'] or 0
+
+    data = {
+        'age_data': list(age_data),
+        'gender_data': list(gender_data),
+        'avg_time_spent': avg_time_spent,
+        'total_persons': total_persons,
+    }
+
+    return JsonResponse(data)

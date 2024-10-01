@@ -10,7 +10,7 @@ admin.site.register( PersonDetection,PersonDetectionAdmin)
 
 
 class DetectionSummaryAdmin(admin.ModelAdmin):
-    list_display = ('total_persons','updated_at')
+    list_display = ('total_persons','updated_at','date')
 
 admin.site.register(PersonCount,DetectionSummaryAdmin)
 

@@ -12,3 +12,4 @@ class PersonDetection(models.Model):
 class PersonCount(models.Model):
     total_persons = models.IntegerField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
+    date = models.DateField(auto_now_add=True)

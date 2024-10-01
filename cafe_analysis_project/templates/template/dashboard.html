@@ -20,7 +20,7 @@
     <div class="row justify-content-end">
         <!-- <div class="row"> -->
             <!-- Leftside: Live Feed & Video Control Buttons -->
-            <div class="col-md-3">
+            <div class="col-md-6">  <!-- Adjusted width from col-md-3 to col-md-6 -->
                 <!-- Live Feed Video Frame -->
                 <div id="live-feed-container" class="card mb-2" style="min-height: 250px; background-color: #000;">
                     <div class="card-header">
@@ -30,6 +30,8 @@
                         <img id="live-feed" src="" alt="Live Video Feed" style="width: 100%; height: auto; display: none;">
                     </div>
                 </div>
+        
+            
     
                 <!-- Start and Stop Buttons -->
                 <div class="mb-2">
@@ -38,7 +40,7 @@
                 </div>
             </div>
         <!-- Data Visualization Charts -->
-        <div class="col-md-9">  <!-- Adjusted width -->
+        <div class="col-md-6">  <!-- Adjusted width -->
             <div class="row">
                 <div class="col-md-5"> <!-- Adjusted width -->
                     <!-- Age Polar Area Chart -->
@@ -94,15 +96,45 @@
     <script>
         function updateFilter() {
             const filter = document.getElementById('filterSelect').value;
-            window.location.href = `?filter=${filter}`;  // Redirect to update the filter
+    
+            // Make an AJAX request to fetch data
+            fetch(`/get-dashboard-data/?filter=${filter}`)
+            .then(response => response.json())
+            .then(data => {
+                // Update Age Polar Area Chart
+                ageChart.data.labels = data.age_data.map(item => item.age);
+                ageChart.data.datasets[0].data = data.age_data.map(item => item.count);
+                ageChart.update();
+    
+                // Update Gender Bar Chart
+                genderChart.data.labels = data.gender_data.map(item => item.gender);
+                genderChart.data.datasets[0].data = data.gender_data.map(item => item.count);
+                genderChart.update();
+    
+                // Update Average Time Spent Line Chart
+                avgTimeSpentChart.data.datasets[0].data = [data.avg_time_spent];
+                avgTimeSpentChart.update();
+    
+                // Update Total Persons Detected Chart
+                totalPersonsChart.data.datasets[0].data = [data.total_persons];
+                totalPersonsChart.update();
+            })
+            .catch(error => console.error('Error fetching data:', error));
         }
+    
+        // Polling for real-time updates every 5 seconds
+        setInterval(function() {
+            updateFilter();  // Call the same function to update the charts
+        }, 2000);
         function startVideo() {
             fetch('/start-video/')
                 .then(response => response.text())
                 .then(data => {
+                    
                     document.getElementById('live-feed').src = '/video_feed/';
-
                     document.getElementById('live-feed').style.display = 'block';
+
+                    
                     document.getElementById('start-video-btn').style.display = 'none';
                     document.getElementById('stop-video-btn').style.display = 'block';
                     console.log("Video stream started");
