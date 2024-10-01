@@ -8,7 +8,8 @@
     <div class="row mb-3 align-items-center">
         <div class="col-md-3">
             <select id="filterSelect" onchange="updateFilter()" class="form-select">
-                <option value="day" {% if filter_option == 'day' %}selected{% endif %}>Last Day</option>
+                <option value="current_day" {% if filter_option == 'current_day' %}selected{% endif %}>Current Day</option>
+                <option value="yesterday" {% if filter_option == 'yesterday' %}selected{% endif %}>Yesterday</option>
                 <option value="week" {% if filter_option == 'week' %}selected{% endif %}>Last Week</option>
                 <option value="month" {% if filter_option == 'month' %}selected{% endif %}>Last Month</option>
                 <option value="year" {% if filter_option == 'year' %}selected{% endif %}>Last Year</option>
@@ -17,6 +18,25 @@
     </div>
     
     <div class="row justify-content-end">
+        <!-- <div class="row"> -->
+            <!-- Leftside: Live Feed & Video Control Buttons -->
+            <div class="col-md-3">
+                <!-- Live Feed Video Frame -->
+                <div id="live-feed-container" class="card mb-2" style="min-height: 250px; background-color: #000;">
+                    <div class="card-header">
+                        <h5 class="mb-0">Live Feed</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <img id="live-feed" src="" alt="Live Video Feed" style="width: 100%; height: auto; display: none;">
+                    </div>
+                </div>
+    
+                <!-- Start and Stop Buttons -->
+                <div class="mb-2">
+                    <button id="start-video-btn" class="btn btn-primary" onclick="startVideo()">Start Video</button>
+                    <button id="stop-video-btn" class="btn btn-danger" style="display: none;" onclick="stopVideo()">Stop Video</button>
+                </div>
+            </div>
         <!-- Data Visualization Charts -->
         <div class="col-md-9">  <!-- Adjusted width -->
             <div class="row">
@@ -75,6 +95,32 @@
         function updateFilter() {
             const filter = document.getElementById('filterSelect').value;
             window.location.href = `?filter=${filter}`;  // Redirect to update the filter
+        }
+        function startVideo() {
+            fetch('/start-video/')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('live-feed').src = '/video_feed/';
+
+                    document.getElementById('live-feed').style.display = 'block';
+                    document.getElementById('start-video-btn').style.display = 'none';
+                    document.getElementById('stop-video-btn').style.display = 'block';
+                    console.log("Video stream started");
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Stop video stream
+        function stopVideo() {
+            fetch('/stop-video/')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('live-feed').style.display = 'none';
+                    document.getElementById('start-video-btn').style.display = 'block';
+                    document.getElementById('stop-video-btn').style.display = 'none';
+                    console.log("Video stream stopped");
+                })
+                .catch(error => console.error('Error:', error));
         }
 
         // Age Polar Area Chart
