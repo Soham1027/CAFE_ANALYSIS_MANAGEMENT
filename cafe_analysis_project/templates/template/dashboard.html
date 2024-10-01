@@ -22,7 +22,7 @@
             <!-- Leftside: Live Feed & Video Control Buttons -->
             <div class="col-md-6">  <!-- Adjusted width from col-md-3 to col-md-6 -->
                 <!-- Live Feed Video Frame -->
-                <div id="live-feed-container" class="card mb-2" style="min-height: 250px; background-color: #000;">
+                <div id="live-feed-container" class="card mb-2" style="min-height: 500px; background-color: #000;">
                     <div class="card-header">
                         <h5 class="mb-0">Live Feed</h5>
                     </div>
@@ -148,6 +148,7 @@
                 .then(response => response.text())
                 .then(data => {
                     document.getElementById('live-feed').style.display = 'none';
+                    document.getElementById('live-feed').src = '';  // Clear the source to stop the video feed
                     document.getElementById('start-video-btn').style.display = 'block';
                     document.getElementById('stop-video-btn').style.display = 'none';
                     console.log("Video stream stopped");

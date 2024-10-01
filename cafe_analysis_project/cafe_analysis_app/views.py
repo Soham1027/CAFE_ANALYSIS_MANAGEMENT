@@ -40,13 +40,13 @@ def dashboard_view(request):
         start_date = today  # Default case if filter is unknown
 
     # Data for age distribution (polar area chart)
-    age_data = PersonDetection.objects.filter(detection_time__date=start_date).values('age').annotate(count=Count('age')).order_by('age')
+    age_data = PersonDetection.objects.filter(detection_time__date=start_date).values('age').annotate(count=Count('age')).order_by('age') or 0
 
     # Data for gender distribution (bar chart)
-    gender_data = PersonDetection.objects.filter(detection_time__date=start_date).values('gender').annotate(count=Count('gender')).order_by('gender')
+    gender_data = PersonDetection.objects.filter(detection_time__date=start_date).values('gender').annotate(count=Count('gender')).order_by('gender') or 0
 
     # Data for average time spent (line chart)
-    avg_time_spent_data = PersonDetection.objects.filter(detection_time__date=start_date).aggregate(avg_time_spent=Avg('time_spent'))
+    avg_time_spent_data = PersonDetection.objects.filter(detection_time__date=start_date).aggregate(avg_time_spent=Avg('time_spent')) or 0
 
     # Data for total persons
     total_persons = PersonCount.objects.filter(date=start_date).aggregate(total=Sum('total_persons'))['total'] or 0
