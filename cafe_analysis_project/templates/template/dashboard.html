@@ -90,183 +90,359 @@
     </div>
 </div>
 {% endblock %}
-
 {% block script %}
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
+
         function updateFilter() {
+
             const filter = document.getElementById('filterSelect').value;
+
     
+
             // Make an AJAX request to fetch data
+
             fetch(`/get-dashboard-data/?filter=${filter}`)
+
             .then(response => response.json())
+
             .then(data => {
+
                 // Update Age Polar Area Chart
+
                 ageChart.data.labels = data.age_data.map(item => item.age);
+
                 ageChart.data.datasets[0].data = data.age_data.map(item => item.count);
+
                 ageChart.update();
+
     
+
                 // Update Gender Bar Chart
+
                 genderChart.data.labels = data.gender_data.map(item => item.gender);
+
                 genderChart.data.datasets[0].data = data.gender_data.map(item => item.count);
+
                 genderChart.update();
+
     
+
                 // Update Average Time Spent Line Chart
+
                 avgTimeSpentChart.data.datasets[0].data = [data.avg_time_spent];
+
                 avgTimeSpentChart.update();
+
     
+
                 // Update Total Persons Detected Chart
+
                 totalPersonsChart.data.datasets[0].data = [data.total_persons];
+
                 totalPersonsChart.update();
+
             })
+
             .catch(error => console.error('Error fetching data:', error));
+
         }
+
     
+
         // Polling for real-time updates every 5 seconds
+
         setInterval(function() {
+
             updateFilter();  // Call the same function to update the charts
+
         }, 2000);
+
         function startVideo() {
+
             fetch('/start-video/')
+
                 .then(response => response.text())
+
                 .then(data => {
+
                     
+
                     document.getElementById('live-feed').src = '/video_feed/';
+
                     document.getElementById('live-feed').style.display = 'block';
 
+
+
                     
+
                     document.getElementById('start-video-btn').style.display = 'none';
+
                     document.getElementById('stop-video-btn').style.display = 'block';
+
                     console.log("Video stream started");
+
                 })
+
                 .catch(error => console.error('Error:', error));
+
         }
+
+
 
         // Stop video stream
+
         function stopVideo() {
+
             fetch('/stop-video/')
+
                 .then(response => response.text())
+
                 .then(data => {
+
                     document.getElementById('live-feed').style.display = 'none';
+
                     document.getElementById('live-feed').src = '';  // Clear the source to stop the video feed
+
                     document.getElementById('start-video-btn').style.display = 'block';
+
                     document.getElementById('stop-video-btn').style.display = 'none';
+
                     console.log("Video stream stopped");
+
                 })
+
                 .catch(error => console.error('Error:', error));
+
         }
 
+
+
         // Age Polar Area Chart
+
         var ageCtx = document.getElementById('ageChart').getContext('2d');
+
         var ageChart = new Chart(ageCtx, {
+
             type: 'polarArea',
+
             data: {
-                labels: [{% for age in age_data %}'{{ age.age }}',{% endfor %}],
+
+                labels: [],
+
                 datasets: [{
+
                     label: 'Age Distribution',
-                    data: [{% for age in age_data %}{{ age.count }},{% endfor %}],
+
+                    data: [],
+
                     backgroundColor: [
+
                         'rgba(255, 99, 132, 0.5)',
+
                         'rgba(54, 162, 235, 0.5)',
+
                         'rgba(255, 206, 86, 0.5)',
+
                         'rgba(75, 192, 192, 0.5)',
+
                         'rgba(153, 102, 255, 0.5)',
+
                         'rgba(153, 272, 255, 0.5)'
+
                     ],
+
                     borderColor: [
+
                         'rgba(255, 99, 132, 1)',
+
                         'rgba(54, 162, 235, 1)',
+
                         'rgba(255, 206, 86, 1)',
+
                         'rgba(75, 192, 192, 1)',
+
                         'rgba(153, 102, 255, 1)',
+
                         'rgba(153, 272, 255, 1)'
+
                     ],
+
                     borderWidth: 1
+
                 }]
+
             },
+
             options: {
+
                 responsive: true,
+
                 maintainAspectRatio: false,
+
                 animation: {
+
                     duration: 1500,
+
                     easing: 'easeInOutQuad',
+
                     animateScale: true,  // Enables scaling animation
+
                     animateRotate: true  // Enables rotation animation
+
                 }
+
             }
+
         });
+
+
 
         // Gender Bar Chart
+
         var genderCtx = document.getElementById('genderChart').getContext('2d');
+
         var genderChart = new Chart(genderCtx, {
+
             type: 'bar',
+
             data: {
-                labels: [{% for gender in gender_data %}'{{ gender.gender }}',{% endfor %}],
+
+                labels: [],
+
                 datasets: [{
+
                     label: 'Gender Distribution',
-                    data: [{% for gender in gender_data %}{{ gender.count }},{% endfor %}],
+
+                    data: [],
+
                     backgroundColor: [
+
                         'rgba(75, 192, 192, 0.2)',
+
                         'rgba(153, 102, 255, 0.2)'
+
                     ],
+
                     borderColor: [
+
                         'rgba(75, 192, 192, 1)',
+
                         'rgba(153, 102, 255, 1)'
+
                     ],
+
                     borderWidth: 1
+
                 }]
+
             },
+
             options: {
+
                 animation: {
+
                     duration: 2000,
+
                     easing: 'easeInOutBounce'
+
                 }
+
             }
+
         });
+
+
 
         // Average Time Spent Line Chart
+
         var avgTimeSpentCtx = document.getElementById('avgTimeSpentChart').getContext('2d');
+
         var avgTimeSpentChart = new Chart(avgTimeSpentCtx, {
+
             type: 'line',
+
             data: {
+
                 labels: ['Average Time Spent'],
+
                 datasets: [{
+
                     label: 'Average Time (seconds)',
+
                     data: [{{ avg_time_spent|default:0 }}],
+
                     borderColor: 'rgba(255, 159, 64, 1)',
+
                     borderWidth: 1,
+
                     fill: false,
+
                 }]
+
             },
+
             options: {
+
                 animation: {
+
                     duration: 1500,
+
                     easing: 'easeOutQuart'
+
                 }
+
             }
+
         });
 
+
+
         // Total Persons Detected Chart
+
         var totalPersonsCtx = document.getElementById('totalPersonsChart').getContext('2d');
+
         var totalPersonsChart = new Chart(totalPersonsCtx, {
+
             type: 'bar',
+
             data: {
+
                 labels: ['Total Persons Detected'],
+
                 datasets: [{
+
                     label: 'Total Persons',
-                    data: [{{ total_persons }}],
+
+                    data: [],
+
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
+
                     borderColor: 'rgba(54, 162, 235, 1)',
+
                     borderWidth: 1
+
                 }]
+
             },
+
             options: {
+
                 animation: {
+
                     duration: 2000,
+
                     easing: 'easeInOutCubic'
+
                 }
+
             }
+
         });
+
     </script>
+
 {% endblock %}
 
