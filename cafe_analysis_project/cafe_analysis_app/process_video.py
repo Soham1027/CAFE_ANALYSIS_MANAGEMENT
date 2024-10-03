@@ -72,7 +72,7 @@ class VideoProcessor:
         logger.info("Live video processing finished and resources cleaned up")
 
 # Initialize global video processor for the stream
-video_processor = VideoProcessor('http://192.168.29.113:4747/video')
+video_processor = VideoProcessor('cafe_analysis_app/2.mp4')
 
 @csrf_exempt
 def start_video_processing(request):
@@ -86,11 +86,20 @@ def stop_video_processing(request):
     return HttpResponse("Live video processing stopped")
 
 # Stream frames for video feed
+import cv2
+import numpy as np
+import logging
+
+# Set up logger
+logger = logging.getLogger(__name__)
+
 def generate_frames(stream_url):
     logger.info(f"Opening video stream {stream_url}")
+
+    # Load models (ensure the models are quantized if possible)
     yolo_net, classes, age_net, gender_net = load_models()
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(stream_url)
     if not cap.isOpened():
         logger.error(f"Failed to open video stream {stream_url}")
         return
@@ -101,21 +110,32 @@ def generate_frames(stream_url):
             logger.error("No frame to read")
             break
 
-        # Perform object detection and process frame
+        # Ensure the frame is in the right format
+        if frame.dtype != np.uint8:
+            # Convert to 8-bit precision if necessary
+            frame = cv2.convertScaleAbs(frame)
+        
+        # Check for correct range
+        frame = np.clip(frame, 0, 255)
+
+        # Perform object detection and other processing on the quantized frame
         detections = yolo_object_detection(frame, yolo_net, classes, target_class_ids=[0])
         frame = process_detections(frame, detections, classes, age_net, gender_net)
 
+        # Encode the frame to JPEG
         ret, jpeg = cv2.imencode('.jpg', frame)
         if not ret:
             logger.error("Failed to encode frame")
             continue
 
+        # Prepare the frame for streaming
         frame = jpeg.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
     cap.release()
 
+
 def video_feed(request):
-    stream_url = 'http://192.168.29.113:4747/video'
+    stream_url = 'cafe_analysis_app/2.mp4'
     return StreamingHttpResponse(generate_frames(stream_url), content_type='multipart/x-mixed-replace; boundary=frame')

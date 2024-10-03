@@ -16,13 +16,13 @@ def load_models():
 
     return yolo_net, classes, age_net, gender_net
 
-def draw_tracking_lines(frame):
-    for person_id, data in person_tracker.items():
-        # Retrieve the last positions to draw lines
-        positions = data.get('positions', [])
-        if len(positions) > 1:
-            for i in range(len(positions) - 1):
-                cv2.line(frame, positions[i], positions[i + 1], (0, 255, 0), 2)
+# def draw_tracking_lines(frame):
+#     for person_id, data in person_tracker.items():
+#         # Retrieve the last positions to draw lines
+#         positions = data.get('positions', [])
+#         if len(positions) > 1:
+#             for i in range(len(positions) - 1):
+#                 cv2.line(frame, positions[i], positions[i + 1], (0, 255, 0), 2)
 
 def yolo_object_detection(frame, net, classes, target_class_ids, conf_threshold=0.25, nms_threshold=0.20):
     height, width = frame.shape[:2]
@@ -147,6 +147,6 @@ def process_detections(frame, detections, classes, age_net, gender_net):
             track_dwell_time(centroid, frame, startX, startY, gender, age)
 
     # Draw the tracking lines after processing detections
-    draw_tracking_lines(frame)
+    # draw_tracking_lines(frame)
 
     return frame
