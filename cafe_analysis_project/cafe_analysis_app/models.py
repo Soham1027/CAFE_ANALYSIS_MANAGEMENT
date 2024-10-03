@@ -10,6 +10,8 @@ class PersonDetection(models.Model):
     last_seen = models.DateTimeField(auto_now=True)  # Last time the person was detected
 
 class PersonCount(models.Model):
+    data_id = models.IntegerField(primary_key=True)  # Unique ID for each person detected
+
     total_persons = models.IntegerField(default=0)
     updated_at = models.DateTimeField(auto_now=True)
     date = models.DateTimeField(auto_now_add=True,unique=True)  # When the detection occurred

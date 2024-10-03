@@ -9,7 +9,7 @@
         <div class="col-md-3">
             <select id="filterSelect" onchange="updateFilter()" class="form-select">
                 <option value="current_day" {% if filter_option == 'current_day' %}selected{% endif %}>Current Day</option>
-                <option value="yesterday" {% if filter_option == 'yesterday' %}selected{% endif %}>Yesterday</option>
+                <!-- <option value="yesterday" {% if filter_option == 'yesterday' %}selected{% endif %}>Yesterday</option> -->
                 <option value="week" {% if filter_option == 'week' %}selected{% endif %}>Last Week</option>
                 <option value="month" {% if filter_option == 'month' %}selected{% endif %}>Last Month</option>
                 <option value="year" {% if filter_option == 'year' %}selected{% endif %}>Last Year</option>
