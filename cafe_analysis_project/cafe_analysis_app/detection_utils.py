@@ -82,7 +82,10 @@ def detect_age_gender(frame, person_blob, age_net, gender_net):
 
 def track_dwell_time(centroid, frame, startX, startY, gender, age):
     current_time = time.time()
-    person_count_obj, _ = PersonCount.objects.get_or_create(pk=1)  # Single entry for person count
+    today = datetime.date.today()  # Get today's date
+
+    # Retrieve or create an entry for today
+    person_count_obj, _ = PersonCount.objects.get_or_create(date=today)
 
     # Check if person exists in the tracker based on centroid movement
     for person_id, data in person_tracker.items():
@@ -126,7 +129,7 @@ def track_dwell_time(centroid, frame, startX, startY, gender, age):
         time_spent=0
     )
 
-    # Update the person count
+    # Update the person count for today
     person_count_obj.total_persons += 1
     person_count_obj.save()
 
