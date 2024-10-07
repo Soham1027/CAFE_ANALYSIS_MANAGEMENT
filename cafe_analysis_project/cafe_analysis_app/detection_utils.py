@@ -96,7 +96,7 @@ def track_dwell_time(centroid, frame, startX, startY, gender, age):
             person_tracker[person_id]['last_position'] = centroid
             person_tracker[person_id]['positions'].append(centroid)  # Store the position for line drawing
             dwell_time = current_time - person_tracker[person_id]['initial_time']
-            
+
             person = PersonDetection.objects.get(person_id=person_id)
             person.time_spent = dwell_time
             person.last_seen = datetime.datetime.now()
@@ -105,7 +105,7 @@ def track_dwell_time(centroid, frame, startX, startY, gender, age):
             # Annotate the frame with person data
             cv2.putText(frame, f"Dwell Time: {dwell_time:.1f}s", (startX, startY - 35), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
             cv2.putText(frame, f"Person ID: {person_id}", (startX, startY - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
-            return
+            return  # Stop processing as we have updated an existing person
 
     # If it's a new person, generate a new person ID
     if PersonDetection.objects.exists():
@@ -120,7 +120,7 @@ def track_dwell_time(centroid, frame, startX, startY, gender, age):
         'last_position': centroid,
         'positions': [centroid]  # Initialize positions for line drawing
     }
-    
+
     # Save the new person in the database
     new_person = PersonDetection.objects.create(
         person_id=new_person_id,
@@ -140,6 +140,9 @@ def track_dwell_time(centroid, frame, startX, startY, gender, age):
 
     # Annotate the frame with new person data
     cv2.putText(frame, f"Person ID: {new_person_id}", (startX, startY - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
+    # Return new person details for use in the alert
+    return new_person_id, gender, age  # Return person ID, gender, and age
 
 def process_detections(frame, detections, classes, age_net, gender_net):
     for detection in detections:

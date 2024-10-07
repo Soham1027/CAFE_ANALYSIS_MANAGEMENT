@@ -20,7 +20,7 @@ class VideoProcessor:
         if self.video_thread and self.video_thread.is_alive():
             return False  # Already running
         self.stop_event.clear()
-        self.cap = cv2.VideoCapture(0)  # Initialize capture object here
+        self.cap = cv2.VideoCapture('cafe_analysis_app/2.mp4')  # Initialize capture object here
         self.video_thread = threading.Thread(target=self.process_video)
         self.video_thread.start()
         return True
@@ -72,7 +72,7 @@ class VideoProcessor:
         logger.info("Live video processing finished and resources cleaned up")
 
 # Initialize global video processor for the stream
-video_processor = VideoProcessor(0)
+video_processor = VideoProcessor('cafe_analysis_app/2.mp4')
 
 @csrf_exempt
 def start_video_processing(request):
@@ -99,7 +99,7 @@ def generate_frames(stream_url):
     # Load models (ensure the models are quantized if possible)
     yolo_net, classes, age_net, gender_net = load_models()
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(stream_url)
     if not cap.isOpened():
         logger.error(f"Failed to open video stream {stream_url}")
         return
@@ -137,5 +137,5 @@ def generate_frames(stream_url):
 
 
 def video_feed(request):
-    stream_url = 0
+    stream_url = 'cafe_analysis_app/2.mp4'
     return StreamingHttpResponse(generate_frames(stream_url), content_type='multipart/x-mixed-replace; boundary=frame')
