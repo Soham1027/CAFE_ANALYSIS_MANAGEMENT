@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import time
-from .models import PersonDetection, PersonCount
+from .models import PersonAgeGender, PersonDetection, PersonCount
 import datetime
 
 # Initialize global dictionary for tracking person positions and detection times
@@ -122,11 +122,16 @@ def track_dwell_time(centroid, frame, startX, startY, gender, age):
     }
     
     # Save the new person in the database
-    PersonDetection.objects.create(
-        person_id=new_person_id, 
-        age=age, 
-        gender=gender, 
+    new_person = PersonDetection.objects.create(
+        person_id=new_person_id,
         time_spent=0
+    )
+
+    # Save age and gender to PersonAgeGender model
+    PersonAgeGender.objects.create(
+        person_detection=new_person,
+        age=age,
+        gender=gender
     )
 
     # Update the person count for today

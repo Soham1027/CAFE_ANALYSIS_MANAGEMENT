@@ -72,7 +72,7 @@ class VideoProcessor:
         logger.info("Live video processing finished and resources cleaned up")
 
 # Initialize global video processor for the stream
-video_processor = VideoProcessor('cafe_analysis_app/2.mp4')
+video_processor = VideoProcessor('cafe_analysis_app/1.mp4')
 
 @csrf_exempt
 def start_video_processing(request):
@@ -137,5 +137,5 @@ def generate_frames(stream_url):
 
 
 def video_feed(request):
-    stream_url = 'cafe_analysis_app/2.mp4'
+    stream_url = 'cafe_analysis_app/1.mp4'
     return StreamingHttpResponse(generate_frames(stream_url), content_type='multipart/x-mixed-replace; boundary=frame')
