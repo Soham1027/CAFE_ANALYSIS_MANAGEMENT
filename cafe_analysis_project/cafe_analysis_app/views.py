@@ -107,7 +107,7 @@ def get_person_info(request):
     latest_person_age_gender=PersonAgeGender.objects.last()
     if latest_person and latest_person_age_gender:
         data = {
-            'person_id': latest_person.id,
+            'person_id': latest_person.person_id,
             'gender': latest_person_age_gender.gender,
             'age': latest_person_age_gender.age,
             'time_spent': latest_person.time_spent,
