@@ -10,7 +10,7 @@ from django.views.decorators.csrf import csrf_exempt
 import threading
 
 class VideoProcessor:
-    def __init__(self, stream_url):
+    def __init__(self, stream_url=0):  # Use 0 for the webcam
         self.stream_url = stream_url
         self.stop_event = threading.Event()
         self.video_thread = None
@@ -20,7 +20,7 @@ class VideoProcessor:
         if self.video_thread and self.video_thread.is_alive():
             return False  # Already running
         self.stop_event.clear()
-        self.cap = cv2.VideoCapture('cafe_analysis_app/2.mp4')  # Initialize capture object here
+        self.cap = cv2.VideoCapture(self.stream_url)  # Initialize capture object here
         self.video_thread = threading.Thread(target=self.process_video)
         self.video_thread.start()
         return True
@@ -41,7 +41,6 @@ class VideoProcessor:
         # Load models once for efficiency
         yolo_net, classes, age_net, gender_net = load_models()
 
-        self.cap = cv2.VideoCapture(self.stream_url)
         if not self.cap.isOpened():
             logger.error(f"Failed to open video stream {self.stream_url}")
             return
@@ -71,9 +70,8 @@ class VideoProcessor:
         cv2.destroyAllWindows()
         logger.info("Live video processing finished and resources cleaned up")
 
-# Initialize global video processor for the stream
-video_processor = VideoProcessor('cafe_analysis_app/2.mp4')
-
+# Initialize global video processor for the webcam
+video_processor = VideoProcessor(0)  
 @csrf_exempt
 def start_video_processing(request):
     if not video_processor.start():
@@ -86,14 +84,9 @@ def stop_video_processing(request):
     return HttpResponse("Live video processing stopped")
 
 # Stream frames for video feed
-import cv2
 import numpy as np
-import logging
 
-# Set up logger
-logger = logging.getLogger(__name__)
-
-def generate_frames(stream_url):
+def generate_frames(stream_url=0):  # Use 0 for the webcam
     logger.info(f"Opening video stream {stream_url}")
 
     # Load models (ensure the models are quantized if possible)
@@ -137,5 +130,5 @@ def generate_frames(stream_url):
 
 
 def video_feed(request):
-    stream_url = 'cafe_analysis_app/2.mp4'
-    return StreamingHttpResponse(generate_frames(stream_url), content_type='multipart/x-mixed-replace; boundary=frame')
+    return StreamingHttpResponse(generate_frames(0), content_type='multipart/x-mixed-replace; boundary=frame')  # Use 0 for webcam
+

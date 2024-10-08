@@ -150,14 +150,13 @@ def process_detections(frame, detections, classes, age_net, gender_net):
         centroid = (int(startX + w / 2), int(startY + h / 2))
 
         if classes[class_id] == "person":
-            person_blob = cv2.dnn.blobFromImage(frame, 1.0, (227, 227), (104.0, 177.0, 123.0))
+            person_blob = cv2.dnn.blobFromImage(frame, 1.0, (227, 227), (78.4263377603, 87.7689143744, 114.895847746))
             gender, age = detect_age_gender(frame, person_blob, age_net, gender_net)
 
             cv2.putText(frame, f"{gender}, {age}", (startX, startY - 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
             track_dwell_time(centroid, frame, startX, startY, gender, age)
 
-    # Draw the tracking lines after processing detections
-    # draw_tracking_lines(frame)
+
 
     return frame
