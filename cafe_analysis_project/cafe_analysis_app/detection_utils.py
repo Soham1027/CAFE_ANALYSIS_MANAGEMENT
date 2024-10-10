@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import time
-from .models import PersonAgeGender, PersonDetection, PersonCount
+from .models import PersonAgeGender, PersonDetection, PersonCount, ObjectDetection, ObjectRelatedPerson
 import datetime
 
 # Initialize global dictionary for tracking person positions and detection times
@@ -16,15 +16,7 @@ def load_models():
 
     return yolo_net, classes, age_net, gender_net
 
-# def draw_tracking_lines(frame):
-#     for person_id, data in person_tracker.items():
-#         # Retrieve the last positions to draw lines
-#         positions = data.get('positions', [])
-#         if len(positions) > 1:
-#             for i in range(len(positions) - 1):
-#                 cv2.line(frame, positions[i], positions[i + 1], (0, 255, 0), 2)
-
-def yolo_object_detection(frame, net, classes, target_class_ids, conf_threshold=0.25, nms_threshold=0.20):
+def yolo_object_detection(frame, net, classes, conf_threshold=0.25, nms_threshold=0.20):
     height, width = frame.shape[:2]
     blob = cv2.dnn.blobFromImage(frame, 1 / 255.0, (416, 416), swapRB=True, crop=False)
     net.setInput(blob)
@@ -41,7 +33,7 @@ def yolo_object_detection(frame, net, classes, target_class_ids, conf_threshold=
             class_id = np.argmax(scores)
             confidence = scores[class_id]
 
-            if confidence > conf_threshold and class_id in target_class_ids:
+            if confidence > conf_threshold:
                 box = detection[0:4] * np.array([width, height, width, height])
                 (centerX, centerY, w, h) = box.astype("int")
 
@@ -144,10 +136,29 @@ def track_dwell_time(centroid, frame, startX, startY, gender, age):
     # Return new person details for use in the alert
     return new_person_id, gender, age  # Return person ID, gender, and age
 
+def add_object_detection(detections, classes):
+    """
+    Adds non-person objects detected to the ObjectDetection model.
+    """
+    for detection in detections:
+        class_id, confidence, startX, startY, w, h = detection
+        object_name = classes[class_id]
+
+        if object_name != "person":  # Exclude persons
+            # Check if the object already exists to avoid duplicates
+            if not ObjectDetection.objects.filter(object_id=class_id).exists():
+                ObjectDetection.objects.create(object_id=class_id, object_name=object_name)
+
+# 
 def process_detections(frame, detections, classes, age_net, gender_net):
     for detection in detections:
         class_id, confidence, startX, startY, w, h = detection
         centroid = (int(startX + w / 2), int(startY + h / 2))
+
+
+
+        label=f"{classes[class_id]}:{confidence:.2f}"
+        cv2.putText(frame,label,(startX,startY - 5),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
         if classes[class_id] == "person":
             person_blob = cv2.dnn.blobFromImage(frame, 1.0, (227, 227), (78.4263377603, 87.7689143744, 114.895847746))
@@ -157,6 +168,7 @@ def process_detections(frame, detections, classes, age_net, gender_net):
 
             track_dwell_time(centroid, frame, startX, startY, gender, age)
 
-
-
+        # Process non-person objects and track their relations
+        add_object_detection(detections, classes)
+    
     return frame

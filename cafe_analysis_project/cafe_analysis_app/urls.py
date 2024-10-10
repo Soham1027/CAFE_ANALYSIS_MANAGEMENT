@@ -1,7 +1,7 @@
 # urls.py
 from django.urls import path
 from . import views
-from .process_video import start_video_processing,stop_video_processing,video_feed
+from .process_video import *
 
 urlpatterns = [
     path('start-video/', start_video_processing, name='start_video'),
@@ -9,8 +9,9 @@ urlpatterns = [
 
     path('stop-video/', stop_video_processing, name='stop_video'),
 
-    path('dashboard/',views.dashboard_view, name='dashboard'),
+    path('',views.dashboard_view, name='dashboard'),
     path('get-dashboard-data/', views.get_dashboard_data, name='get_dashboard_data'),
    
     path('get-person-info/', views.get_person_info, name='get_person_info'), 
+    path('get-object-info/', views.get_object_info, name='get_object_info'),
 ]

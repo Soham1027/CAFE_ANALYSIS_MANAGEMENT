@@ -10,7 +10,9 @@ from django.views.decorators.csrf import csrf_exempt
 import threading
 
 class VideoProcessor:
-    def __init__(self, stream_url=0):  # Use 0 for the webcam
+    # def __init__(self, stream_url=0): 
+    def __init__(self, stream_url='cafe_analysis_app/2.mp4'):  # Use 0 for the webcam
+         # Use 0 for the webcam
         self.stream_url = stream_url
         self.stop_event = threading.Event()
         self.video_thread = None
@@ -56,7 +58,7 @@ class VideoProcessor:
                 break
 
             # Perform YOLO object detection
-            detections = yolo_object_detection(frame, yolo_net, classes, target_class_ids=[0])
+            detections = yolo_object_detection(frame, yolo_net, classes)
 
             # Process detections (e.g., annotate frame with age and gender)
             frame = process_detections(frame, detections, classes, age_net, gender_net)
@@ -71,7 +73,9 @@ class VideoProcessor:
         logger.info("Live video processing finished and resources cleaned up")
 
 # Initialize global video processor for the webcam
-video_processor = VideoProcessor(0)  
+# video_processor = VideoProcessor(0)  
+video_processor = VideoProcessor('cafe_analysis_app/2.mp4')  
+
 @csrf_exempt
 def start_video_processing(request):
     if not video_processor.start():
@@ -86,7 +90,9 @@ def stop_video_processing(request):
 # Stream frames for video feed
 import numpy as np
 
-def generate_frames(stream_url=0):  # Use 0 for the webcam
+# def generate_frames(stream_url=0):
+def generate_frames(stream_url='cafe_analysis_app/2.mp4'):  # Use 0 for the webcam
+     # Use 0 for the webcam
     logger.info(f"Opening video stream {stream_url}")
 
     # Load models (ensure the models are quantized if possible)
@@ -112,7 +118,7 @@ def generate_frames(stream_url=0):  # Use 0 for the webcam
         frame = np.clip(frame, 0, 255)
 
         # Perform object detection and other processing on the quantized frame
-        detections = yolo_object_detection(frame, yolo_net, classes, target_class_ids=[0])
+        detections = yolo_object_detection(frame, yolo_net, classes)
         frame = process_detections(frame, detections, classes, age_net, gender_net)
 
         # Encode the frame to JPEG
@@ -130,5 +136,5 @@ def generate_frames(stream_url=0):  # Use 0 for the webcam
 
 
 def video_feed(request):
-    return StreamingHttpResponse(generate_frames(0), content_type='multipart/x-mixed-replace; boundary=frame')  # Use 0 for webcam
+    return StreamingHttpResponse(generate_frames('cafe_analysis_app/2.mp4'), content_type='multipart/x-mixed-replace; boundary=frame')  # Use 0 for webcam
 

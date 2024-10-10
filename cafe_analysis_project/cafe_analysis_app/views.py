@@ -114,3 +114,17 @@ def get_person_info(request):
         }
         return JsonResponse(data)
     return JsonResponse({'error': 'No data available'})
+
+
+
+
+def get_object_info(request):
+    # Get the latest object detection
+    latest_object = ObjectDetection.objects.last()  # Assuming you have a way to get the latest object detected
+    if latest_object:
+        data = {
+         
+            'object_name': latest_object.object_name,
+        }
+        return JsonResponse(data)
+    return JsonResponse({'error': 'No object data available'})

@@ -27,3 +27,22 @@ class PersonAgeGender(models.Model):
 
     def __str__(self):
         return f'Person {self.person_detection.person_id} - Age: {self.age}, Gender: {self.gender}'
+
+
+
+class ObjectDetection(models.Model):
+    object_id = models.IntegerField(unique=True)  # Unique ID for each person detected
+    object_name=models.CharField(max_length=500)
+
+    def __str__(self):
+        return f'Person {self.object_id}'
+
+class ObjectRelatedPerson(models.Model):
+    person_detection = models.ForeignKey(PersonDetection, on_delete=models.CASCADE)
+
+    object_id = models.IntegerField(unique=True)  # Unique ID for each person detected
+    object_name=models.CharField(max_length=500)
+
+    def __str__(self):
+        return f'Person {self.object_id}'
+

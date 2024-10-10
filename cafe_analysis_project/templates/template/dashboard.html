@@ -39,6 +39,8 @@
                     <button id="stop-video-btn" class="btn btn-danger" style="display: none;" onclick="stopVideo()">Stop Video</button>
                 </div>
                 <div id="person-info" class="alert alert-info" style="display: none;"></div>
+                <div id="object-info" class="alert alert-info" style="display: none;"></div>
+
             </div>
         <!-- Data Visualization Charts -->
         <div class="col-md-6">  <!-- Adjusted width -->
@@ -185,7 +187,9 @@
 
                     console.log("Video stream started");
 
-                    setInterval(fetchPersonInfo, 5000);  // Adjust the interval as necessary
+                    setInterval(fetchPersonInfo, 5000);
+                    setInterval(fetchObjectInfo, 5000);  // Adjust the interval as necessary
+                      // Adjust the interval as necessary
                 })
                 
                 .catch(error => console.error('Error:', error));
@@ -208,6 +212,20 @@
                 .catch(error => console.error('Error fetching person info:', error));
         }
 
+        function fetchObjectInfo() {
+            fetch('/get-object-info/')  // This is the endpoint for object data
+                .then(response => response.json())
+                .then(data => {
+                    // Assuming data contains the object information
+                    if (data) {
+                        const objectInfo = `Object Name: ${data.object_name}`;
+                        const objectInfoContainer = document.getElementById('object-info');
+                        objectInfoContainer.textContent = objectInfo;
+                        objectInfoContainer.style.display = 'block'; // Show the message container
+                    }
+                })
+                .catch(error => console.error('Error fetching object info:', error));
+        }
 
         // Stop video stream
 
