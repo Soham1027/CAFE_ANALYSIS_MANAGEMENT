@@ -100,47 +100,57 @@
     <script>
 
         function updateFilter() {
+
             const filter = document.getElementById('filterSelect').value;
+
     
+
+            // Make an AJAX request to fetch data
+
             fetch(`/get-dashboard-data/?filter=${filter}`)
+
             .then(response => response.json())
+
             .then(data => {
-                const hours = data.age_data.map(item => `${new Date(item.hour).getHours()}-${new Date(item.hour).getHours() + 1}`);
-    
-                // Update Age Chart with Hourly Data
-                ageChart.data.labels = hours;
+
+                // Update Age Polar Area Chart
+
+                ageChart.data.labels = data.age_data.map(item => item.age);
+
                 ageChart.data.datasets[0].data = data.age_data.map(item => item.count);
+
                 ageChart.update();
+
     
-                // Update Gender Chart with Hourly Data (Stacked Bar)
-                genderChart.data.labels = hours;
-                const maleData = new Array(hours.length).fill(0);
-                const femaleData = new Array(hours.length).fill(0);
-    
-                data.gender_data.forEach(item => {
-                    const hourIndex = hours.indexOf(`${new Date(item.hour).getHours()}-${new Date(item.hour).getHours() + 1}`);
-                    if (item.gender === 'male') {
-                        maleData[hourIndex] = item.count;
-                    } else {
-                        femaleData[hourIndex] = item.count;
-                    }
-                });
-    
-                genderChart.data.datasets[0].data = maleData;
-                genderChart.data.datasets[1].data = femaleData;
+
+                // Update Gender Bar Chart
+
+                genderChart.data.labels = data.gender_data.map(item => item.gender);
+
+                genderChart.data.datasets[0].data = data.gender_data.map(item => item.count);
+
                 genderChart.update();
+
     
+
                 // Update Average Time Spent Line Chart
-                avgTimeSpentChart.data.labels = hours;
-                avgTimeSpentChart.data.datasets[0].data = data.total_time_spent.map(item => item.avg_time_spent || 0);
+
+                avgTimeSpentChart.data.datasets[0].data = [data.avg_time_spent];
+
                 avgTimeSpentChart.update();
+
     
+
                 // Update Total Persons Detected Chart
-                totalPersonsChart.data.labels = hours;
-                totalPersonsChart.data.datasets[0].data = data.total_persons.map(item => item.total || 0);
+
+                totalPersonsChart.data.datasets[0].data = [data.total_persons];
                 totalPersonsChart.update();
+
+
             })
+
             .catch(error => console.error('Error fetching data:', error));
+
         }
 
     
@@ -248,137 +258,152 @@
         // Age Polar Area Chart
 
         var ageCtx = document.getElementById('ageChart').getContext('2d');
-    var ageChart = new Chart(ageCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['0-18', '19-35', '36-50', '51-65', '66+'],
-            datasets: [{
-                label: 'Age Distribution',
-                data: [15, 25, 30, 20, 10],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.5)',
-                    'rgba(54, 162, 235, 0.5)',
-                    'rgba(255, 206, 86, 0.5)',
-                    'rgba(75, 192, 192, 0.5)',
-                    'rgba(153, 102, 255, 0.5)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, .6)',
-                    'rgba(153, 102, 255, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: {
-                duration: 1500,
-                easing: 'easeInOutQuad',
-                animateScale: true,
-                animateRotate: true
+
+        var ageChart = new Chart(ageCtx, {
+            type: 'doughnut', // Doughnut chart type
+            data: {
+                labels: ['0-18', '19-35', '36-50', '51-65', '66+'], // Age group labels
+                datasets: [{
+                    label: 'Age Distribution', // Dataset label
+                    data: [15, 25, 30, 20, 10], // Sample data for each age group
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.5)',
+                        'rgba(54, 162, 235, 0.5)',
+                        'rgba(255, 206, 86, 0.5)',
+                        'rgba(75, 192, 192, 0.5)',
+                        'rgba(153, 102, 255, 0.5)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, .6)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1 // Width of the border around the segments
+                }]
             },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top'
+            options: {
+                responsive: true, // Make the chart responsive
+                maintainAspectRatio: false, // Do not maintain aspect ratio
+                animation: {
+                    duration: 1500, // Duration of the animation
+                    easing: 'easeInOutQuad', // Easing function for the animation
+                    animateScale: true, // Enable scaling animation
+                    animateRotate: true // Enable rotation animation
                 },
-                tooltip: {
-                    enabled: true
+                plugins: {
+                    legend: {
+                        display: true, // Display the legend
+                        position: 'top' // Position of the legend
+                    },
+                    tooltip: {
+                        enabled: true // Enable tooltips
+                    }
                 }
             }
-        }
-    });
+        });
 
-    // Gender Bar Chart (Stacked)
-    var genderCtx = document.getElementById('genderChart').getContext('2d');
-    var genderChart = new Chart(genderCtx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [
-                {
-                    label: 'Male',
+
+        // Gender Bar Chart
+
+        var genderCtx = document.getElementById('genderChart').getContext('2d');
+
+        var genderChart = new Chart(genderCtx, {
+
+            type: 'bar',
+
+            data: {
+
+                labels: [],
+
+                datasets: [{
+
+                    label: 'Gender Distribution',
+
                     data: [],
-                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
+
+                    backgroundColor: [
+
+                        'rgba(75, 192, 192, 0.2)',
+
+                        'rgba(153, 102, 255, 0.2)'
+
+                    ],
+
+                    borderColor: [
+
+                        'rgba(75, 192, 192, 1)',
+
+                        'rgba(153, 102, 255, 1)'
+
+                    ],
+
                     borderWidth: 1
-                },
-                {
-                    label: 'Female',
-                    data: [],
-                    backgroundColor: 'rgba(153, 102, 255, 0.5)',
-                    borderColor: 'rgba(153, 102, 255, 1)',
-                    borderWidth: 1
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: {
-                    stacked: true
-                },
-                y: {
-                    stacked: true
-                }
+
+                }]
+
             },
-            animation: {
-                duration: 2000,
-                easing: 'easeInOutBounce'
-            }
-        }
-    });
 
-    // Average Time Spent Line Chart
-    var avgTimeSpentCtx = document.getElementById('avgTimeSpentChart').getContext('2d');
-    var avgTimeSpentChart = new Chart(avgTimeSpentCtx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Average Time (seconds)',
-                data: [],
-                borderColor: 'rgba(255, 159, 64, 1)',
-                borderWidth: 2,
-                fill: false,
-                tension: 0.1 // Smooth the line
-            }]
-        },
-        options: {
-            responsive: true,
-            animation: {
-                duration: 1500,
-                easing: 'easeOutQuart'
-            }
-        }
-    });
+            options: {
 
-    // Total Persons Detected Chart
-    var totalPersonsCtx = document.getElementById('totalPersonsChart').getContext('2d');
-    var totalPersonsChart = new Chart(totalPersonsCtx, {
-        type: 'bar',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Total Persons Detected',
-                data: [],
-                backgroundColor: 'rgba(255, 206, 86, 0.5)',
-                borderColor: 'rgba(255, 206, 86, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            animation: {
-                duration: 1500,
-                easing: 'easeInOutExpo'
+                animation: {
+
+                    duration: 2000,
+
+                    easing: 'easeInOutBounce'
+
+                }
+
             }
-        }
-    });
+
+        });
+
+
+
+        // Average Time Spent Line Chart
+
+        var avgTimeSpentCtx = document.getElementById('avgTimeSpentChart').getContext('2d');
+
+        var avgTimeSpentChart = new Chart(avgTimeSpentCtx, {
+
+            type: 'bar',
+
+            data: {
+
+                labels: ['Average Time Spent'],
+
+                datasets: [{
+
+                    label: 'Average Time (seconds)',
+
+                    data: [{{ avg_time_spent|default:0 }}],
+
+                    borderColor: 'rgba(255, 159, 64, 1)',
+
+                    borderWidth: 1,
+
+                    fill: false,
+
+                }]
+
+            },
+
+            options: {
+
+                animation: {
+
+                    duration: 1500,
+
+                    easing: 'easeOutQuart'
+
+                }
+
+            }
+
+        });
+
+
 
         // Total Persons Detected Chart
 
